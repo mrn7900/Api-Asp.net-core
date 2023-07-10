@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using System.Data;
 
+//https://www.youtube.com/watch?v=Br8H-TuSSO8&t=738s
 namespace test2.Controllers.Department
 {
     [Route("api/[controller]")]
@@ -108,6 +109,39 @@ namespace test2.Controllers.Department
                 }
             }
             return new JsonResult(table);
+        }
+
+        [HttpDelete("{id}")]
+        public JsonResult Delete(test2.Models.Department.Department dep)
+        {
+           
+            string query = @"
+                delete from test1.department
+                where Id = @Id;
+            ";
+
+            DataTable table = new DataTable();
+
+            string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
+
+            MySqlDataReader myReader;
+
+            using (MySqlConnection mycon = new MySqlConnection(sqlDataSource))
+            {
+                mycon.Open();
+                using (MySqlCommand myCommand = new MySqlCommand(query, mycon))
+                {
+                    myCommand.Parameters.AddWithValue("@Id", dep.Id);
+                    
+                    //try to add id control
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                   
+                    myReader.Close();
+                    mycon.Close();
+                }
+            }
+            return new JsonResult("Delete was sucsses!");
         }
 
     }
